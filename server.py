@@ -1,28 +1,9 @@
-import json
 import time
 from argparse import ArgumentParser
 from functools import partial
-from http.client import HTTPSConnection
-from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer
 
-
-class GeoCoderHTTPRequestHandler(BaseHTTPRequestHandler):
-    def __init__(self, google_key, bing_key, *args, **kwargs):
-        self.google_key = google_key
-        self.bing_key = bing_key
-        super().__init__(*args, **kwargs)
-
-    def do_POST(self):
-        connection1 = HTTPSConnection("maps.googleapis.com")
-        connection1.request("GET", "/maps/api/geocode/json?address=1247+Lakeside+Dr,+Sunnyvale,+CA+94085&key=" + self.google_key)
-        response = connection1.getresponse()
-        self.send_response(200)
-        self.end_headers()
-        text = bytes.decode(response.read(), 'utf-8')
-        data = json.loads(text)
-        print(json.dumps(data, indent=4, sort_keys=True))
-        self.wfile.write('{{"lat": {}, "long":{}}}'.format(data["results"][0]["geometry"]["location"]["lat"], data["results"][0]["geometry"]["location"]["lng"]).encode("utf-8"))
-
+from handler import GeoCoderHTTPRequestHandler
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Start a GeoCoder HTTP server on localhost.')
