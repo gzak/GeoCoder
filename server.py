@@ -8,8 +8,8 @@ from handler import GeoCoderHTTPRequestHandler
 if __name__ == '__main__':
     parser = ArgumentParser(description='Start a GeoCoder HTTP server on localhost.')
     parser.add_argument("-p", "--port", type=int, default=4321)
-    parser.add_argument("-gk", "--google-key")
-    parser.add_argument("-bk", "--bing-key")
+    parser.add_argument("-g", "--google-key")
+    parser.add_argument("-b", "--bing-key")
 
     args = parser.parse_args()
     httpd = ThreadingHTTPServer(("localhost", args.port),

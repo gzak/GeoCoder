@@ -25,7 +25,11 @@ class GeoCoderHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def geocode_with_google(self, address):
         try:
-            address_parts = [address["line"], address["city"], address["state"], address["postal"]]
+            address_parts = [address["line"],
+                             address.get("city", ""),
+                             address.get("state", ""),
+                             address.get("postal", ""),
+                             address.get("country", "")]
             address_param = ", ".join([ap for ap in address_parts if not ap.isspace()])
 
             connection = HTTPSConnection("maps.googleapis.com")
@@ -49,11 +53,11 @@ class GeoCoderHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def geocode_with_bing(self, address):
         try:
-            bing_address = {"adminDistrict": address.get("state", ""),
-                            "postalCode": address.get("postal", ""),
+            bing_address = {"addressLine": address["line"],
                             "locality": address.get("city", ""),
-                            "addressLine": address["line"],
-                            "countryRegion": "US",  # only support US for now
+                            "adminDistrict": address.get("state", ""),
+                            "postalCode": address.get("postal", ""),
+                            "countryRegion": address.get("country", ""),
                             "key": self.bing_key}
             bing_address = {k: v for k, v in bing_address.items() if not v.isspace()}
 
@@ -70,8 +74,7 @@ class GeoCoderHTTPRequestHandler(BaseHTTPRequestHandler):
                 return 200, {"lat": coords[0], "long": coords[1], "confidence": location["confidence"]}
             else:
                 return 404 if status == 200 else status,\
-                       {"error": "Bing couldn't find anything: " + result["statusDescription"],
-                        "errorDetails": result.get("errorDetails", [])}
+                       {"error": "Bing couldn't find anything: " + result["statusDescription"]}
         except Exception as e:
             return 500, {"error": "Error encountered with Bing: " + str(e)}
 
